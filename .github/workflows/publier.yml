@@ -33,6 +33,7 @@ jobs:
 
       - name: Rendre le cours
         run: |
+          ./demo-norrsken/marketplace/construire.sh
           ./cours/extraire.sh
           quarto render cours --to html
 
