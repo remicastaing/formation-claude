@@ -1,0 +1,98 @@
+# Module 3 — Sous-agents : déléguer et isoler
+
+::: {.signal}
+**Signal** : une tâche annexe produit des pages de sortie que tu ne reliras jamais.
+:::
+
+## Le problème
+
+Qui a déjà demandé à Claude de chercher quelque chose dans un gros dossier, et s'est retrouvé avec quarante pages de sortie jamais relues ? Et ensuite, la conversation était-elle aussi bonne qu'avant ? Non. Tout ce qui entre dans une conversation y reste, et pèse sur tout ce qui suit.
+
+Le collègue ne lit pas lui-même les deux cents dossiers. Il envoie le stagiaire, qui revient avec une page.
+
+![](figures/stagiaire.png){width=35%}
+
+## Le concept
+
+### Un stagiaire, une mission, un résumé
+
+Un sous-agent est un agent que Claude lance pour une tâche précise, avec trois choses à lui :
+
+- son **contexte**, vide au départ ;
+- sa **consigne**, écrite dans un fichier ;
+- ses **outils**, qui peuvent être moins nombreux que ceux de la conversation, par exemple la lecture seule.
+
+Quand il a fini, il ne renvoie qu'un résumé. Tout ce qu'il a lu, cherché, exécuté reste chez lui et disparaît.
+
+Le fichier vit dans `.claude/agents/<nom>.md`, à côté du dossier des skills. Un en-tête avec le nom, la description qui dit quand lui déléguer, la liste des outils, éventuellement le modèle. Le corps est la consigne : qui il est, ce qu'il doit faire, et surtout ce qu'il doit rapporter, sous quelle forme.
+
+### Ce qu'il voit, ce qu'il ne voit pas
+
+| Il voit | Il ne voit pas |
+|---|---|
+| Sa consigne | La conversation en cours |
+| La mission que Claude lui confie | Ce que vous avez dit avant |
+| Le `CLAUDE.md` du projet | Les skills, sauf ceux préchargés dans son en-tête (`skills:`) |
+
+Conséquence pratique : la mission se formule en entier, comme à quelqu'un qui arrive dans la pièce. « Cherche ça » ne suffit pas ; « cherche où est géré l'export dans ce dépôt et rapporte les fichiers et les fonctions concernés, rien d'autre » suffit.
+
+On le lance en le nommant dans la demande (« utilise le sous-agent explorateur pour… ») ou en laissant Claude décider d'après la description. Par défaut il tourne en arrière-plan : on continue à travailler et le résumé arrive quand il a fini.
+
+### Trois usages
+
+1. **Isoler** : une tâche bavarde (tests, logs, recherche dans deux cents fichiers) dont seule la conclusion compte.
+2. **Paralléliser** : trois recherches indépendantes, trois sous-agents en même temps, trois résumés.
+3. **Restreindre et spécialiser** : lecture seule, modèle plus léger pour les tâches simples, skill de référence préchargé.
+
+Au-delà de quelques sous-agents, il existe les *workflows dynamiques* : un script, écrit par Claude, qui en orchestre des dizaines, pour auditer un dépôt entier ou migrer cinq cents fichiers. On le cite ; ce n'est pas pour un ticket.
+
+### Ce qu'un sous-agent n'est pas
+
+Un moyen d'itérer. Il n'a pas la mémoire de l'échange. Pour affiner une réponse en trois allers-retours, on reste dans la conversation. Pour une question rapide, aussi.
+
+## Exemple côté code
+
+L'explorateur du dépôt Norrsken :
+
+{{< include _extraits/agent-explorateur.md >}}
+
+Trois lignes à voir : `tools` limité à la lecture, `model` plus léger, et une consigne qui dit exactement quoi rapporter et en combien de lignes.
+
+La démo tient en trois commandes. `/context`, pour noter la taille de la conversation. Puis : « Utilise le sous-agent explorateur : où est géré l'export PDF, et quelles fonctions sont impliquées ? » Le résumé arrive, cinq lignes, des chemins, des noms de fonctions. Puis `/context` à nouveau : la conversation n'a grossi que de ces cinq lignes. Les fichiers lus par le sous-agent n'y sont pas et n'y seront jamais.
+
+L'atelier développeurs construit un second sous-agent, `verif`, en lecture seule, qui relit un correctif :
+
+{{< include _extraits/agent-verif.md >}}
+
+Il précharge le skill `review` du module 2 : le savoir-faire de relecture est chargé chez lui, pas dans la conversation principale.
+
+## Exemple côté métier
+
+Un sous-agent de veille concurrentielle, qui lit beaucoup et ne rapporte que ce qui compte pour un argumentaire :
+
+{{< include _extraits/agent-veille.md >}}
+
+Sans lui, quinze pages web entrent dans la conversation et la réponse au ticket qui suit en souffre. Avec lui, cinq lignes entrent. Il précharge la grille tarifaire pour ne pas réinventer nos offres.
+
+## L'exercice : la tâche qui inonde
+
+Le TP 3 est une fiche papier en trois questions : quelle tâche de ma semaine produit des pages que je ne relis jamais ; qu'est-ce que je voudrais en retenir en cinq lignes ; cette tâche a-t-elle besoin de savoir ce qu'on s'est dit avant ? Un « oui » à la troisième question dit que ce n'est probablement pas un sous-agent.
+
+Au tour de table, le formateur trie : une tâche d'itération reste dans la conversation ; la même procédure à chaque fois avec un résultat à garder sous les yeux est un skill ; une tâche bavarde à conclusion courte est un sous-agent.
+
+## Pièges
+
+**Il ne se souvient pas de ce que je lui ai dit.** Normal : il ne voit pas la conversation. Tout doit être dans sa consigne ou dans la mission.
+
+**Sous-agent ou skill ?** Le skill est une procédure suivie *dans* la conversation : le résultat et tout ce qui a servi à le produire y entrent. Le sous-agent produit *à côté* et ne rapporte que la fin. Bavard et jetable : sous-agent. Court et à garder sous les yeux : skill.
+
+**Peut-il modifier des fichiers ?** S'il a l'outil. Un relecteur ou un chercheur n'a que la lecture, et c'est une garantie.
+
+**`/agents` ?** La commande ne fait plus qu'afficher un rappel : on crée le fichier dans `.claude/agents/`, à la main ou en le faisant écrire par Claude.
+
+## À retenir
+
+- Contexte vide, consigne dans `.claude/agents/<nom>.md`, outils propres, un résumé.
+- Il ne voit pas la conversation ; la mission se formule en entier.
+- Isoler, paralléliser, restreindre. Pas pour itérer.
+- **Signal** : des pages jamais relues.

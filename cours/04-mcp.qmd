@@ -1,0 +1,99 @@
+# Module 4 — MCP : connecter au monde extérieur
+
+::: {.signal}
+**Signal** : tu copies-colles des données depuis un onglet que Claude ne voit pas.
+:::
+
+## Le problème
+
+Au module 0, la fiche client était dans un dossier, à côté du ticket, parce qu'on l'y avait mise. Dans la vraie vie, elle est dans le CRM, dans un autre onglet. On copie, on colle, et Claude travaille sur ce qu'on a bien voulu lui coller.
+
+Ce sont les accès du collègue. Sans eux, il travaille sur ce qu'on lui apporte.
+
+![](figures/acces.png){width=35%}
+
+## Le concept
+
+### Un protocole, des serveurs, des outils
+
+MCP (Model Context Protocol) est un protocole. Un *serveur* MCP est un petit programme, local ou distant, qui présente un système externe sous forme d'*outils* que Claude peut appeler : lire une fiche, lancer une requête, créer une issue, envoyer un message. Claude Code se connecte au serveur, découvre ses outils, et les utilise comme il utilise « lire un fichier ».
+
+**L'authentification est du côté du serveur.** Un serveur distant demande une connexion une fois, dans le navigateur, et garde le jeton ; un serveur local reçoit une clé dans sa configuration. Claude ne voit jamais le mot de passe. On ne donne pas ses identifiants à Claude ; on connecte un serveur qui les garde.
+
+Trois familles : les serveurs distants publiés par les éditeurs (GitHub, Notion, l'outil de ticketing) ; les serveurs locaux lancés sur le poste (un dossier de fichiers, une base de données) ; et les connecteurs de claude.ai (Drive, Gmail, Slack), activés dans le compte et disponibles ensuite dans Claude Code.
+
+### L'accès et le savoir-faire
+
+| MCP donne | Le skill donne |
+|---|---|
+| L'accès au CRM | La procédure de réponse |
+| La requête sur la base | Ce qu'il faut vérifier, dans quel ordre |
+| L'écriture dans le ticketing | Ce qu'on n'écrit jamais |
+
+Les deux se combinent et aucun ne suffit seul. Un MCP sans skill : Claude a accès au CRM et ne sait pas quoi y chercher. Un skill sans MCP : il sait quoi chercher et ne peut pas. La démo montre le second cas, puis le corrige.
+
+### Où ça se configure
+
+| Portée | Où | Qui |
+|---|---|---|
+| Locale | Mon poste, ce projet | Moi seul |
+| Projet | `.mcp.json` à la racine, partagé par le dépôt | Toute l'équipe ; chacun approuve le serveur à la première ouverture |
+| Utilisateur | Mon poste, tous mes projets | Moi seul |
+
+En cas de doublon, la locale l'emporte sur le projet, qui l'emporte sur l'utilisateur. Le fichier de projet est celui de l'équipe. Un serveur de portée projet vient du dépôt, donc potentiellement de quelqu'un d'autre : Claude Code demande d'approuver, une fois. C'est voulu.
+
+`/mcp` dans une session liste les serveurs, leur état, le nombre d'outils, et permet de s'authentifier. En ligne de commande, `claude mcp add` ajoute un serveur.
+
+Le fichier de projet de l'atelier support :
+
+{{< include _extraits/mcp-json.md >}}
+
+Le chemin du CRM est une variable d'environnement avec une valeur par défaut. Un fichier de projet décrit *quel* serveur, jamais *avec quel secret* : on n'y met pas un jeton en clair.
+
+## Exemple côté code
+
+Deux cas, sans démo.
+
+- **Base de staging** : un serveur connecté à la base avec un compte *en lecture seule*. « Le client Brossard a-t-il bien douze utilisateurs actifs ? » Claude écrit la requête, la lance, lit le résultat, sans copier-coller depuis un client SQL.
+- **GitHub** : Claude lit la PR liée au ticket, les commentaires, le diff ; le skill `/review` du module 2 peut alors prendre un numéro de PR.
+
+Retenir « lecture seule » : c'est la précaution numéro un.
+
+## La démo : sans, puis avec
+
+La fiche Brossard n'est plus dans `support/clients/` : elle est dans un dossier `norrsken-crm/`, hors du dossier de travail, qui joue le rôle du CRM.
+
+« Réponds à la réclamation de Brossard sur la facture. » Le skill `/reponse-ticket` se déclenche, cherche la fiche comme sa procédure le lui dit, ne la trouve pas, et répond quand même. Il manque le chargé de compte et l'historique. La réponse est propre, incomplète, et personne ne le verrait.
+
+On connecte le serveur le plus simple qui existe, un serveur de fichiers, sur le dossier CRM :
+
+```bash
+claude mcp add --scope project --transport stdio crm -- \
+  npx -y @modelcontextprotocol/server-filesystem /chemin/vers/norrsken-crm
+```
+
+`/mcp` : le serveur est là, avec ses outils. Nouvelle session, même demande mot pour mot. Le skill cherche la fiche dans le dossier, ne la trouve pas, et cette fois a un autre chemin : il passe par le serveur. La réponse retrouve Thomas Renaud et l'historique.
+
+Rien n'a changé dans le skill. Le savoir-faire était là ; il manquait l'accès. Une ligne du skill fait le lien : « lire la fiche du client dans `clients/` si elle s'y trouve, sinon par le CRM connecté ». Sans cette ligne, Claude ne pense pas à l'autre chemin ; c'est le premier point de la section dépannage du TP 4.
+
+## Trois précautions
+
+1. **Un serveur, c'est quelqu'un qu'on laisse entrer.** Un serveur qui ramène du contenu extérieur (pages web, mails, tickets) peut ramener des instructions cachées dans ce contenu. On ne connecte que des serveurs qu'on connaît : publiés par l'éditeur du système, ou relus par un développeur.
+2. **Lecture seule quand c'est possible.** Compte de base de données en lecture, jeton limité, dossier restreint. Un accès en écriture, c'est un hook qui le garde (module 5).
+3. **Un serveur inutilisé coûte.** Chaque serveur ajoute des outils que Claude doit connaître, et une requête bavarde remplit vite la conversation ; la sortie d'un outil est plafonnée, mais on débranche ce qu'on n'utilise pas. `/mcp` le permet par projet.
+
+## Pièges
+
+**Le serveur apparaît dans `/mcp` mais Claude ne l'utilise pas.** Vérifier qu'il est connecté, puis que la demande ou le skill donne une raison d'aller chercher. Le savoir-faire doit mentionner l'accès.
+
+**L'application de bureau.** Les serveurs MCP et les connecteurs y sont disponibles ; le réglage n'est pas en ligne de commande. Le fichier `.mcp.json` produit est le même.
+
+**Drive.** Par les connecteurs claude.ai, activés dans le compte : le compte rendu de rendez-vous peut alors se ranger tout seul dans le bon dossier.
+
+## À retenir
+
+- Un serveur MCP expose un système externe en outils ; l'authentification est chez le serveur.
+- MCP donne l'accès, le skill donne le savoir-faire ; il faut les deux.
+- Portées locale, projet (`.mcp.json`), utilisateur ; `/mcp` pour vérifier.
+- Serveurs connus, lecture seule, débrancher l'inutile.
+- **Signal** : le copier-coller depuis un onglet.

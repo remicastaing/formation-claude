@@ -1,0 +1,20 @@
+# Obsidian et système
+.obsidian/
+.DS_Store
+
+# Générés
+cours/_book/
+cours/_extraits/
+cours/.quarto/
+supports/slides.html
+supports/slides.pdf
+demo-norrsken/marketplace/plugins/
+supports/figures/_essais/
+
+# Dépôt de démo
+demo-norrsken/app/node_modules/
+demo-norrsken/app/.env
+demo-norrsken/support/audit.log
+
+# Réglages personnels
+.claude/settings.local.json

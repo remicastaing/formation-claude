@@ -1,0 +1,9 @@
+{
+  "name": "norrsken",
+  "owner": { "name": "Norrsken" },
+  "description": "Plugins de démo du cours : service client et dépôt produit Norrsken Planning",
+  "plugins": [
+    { "name": "norrsken-support", "source": "./plugins/norrsken-support", "description": "Service client : skills, agent de veille, hooks, CRM" },
+    { "name": "norrsken-dev",     "source": "./plugins/norrsken-dev",     "description": "Dépôt produit : revue, explorateur, hooks" }
+  ]
+}

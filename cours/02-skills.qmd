@@ -1,0 +1,123 @@
+# Module 2 — Les skills : savoir à la demande et workflows invocables
+
+::: {.signal}
+**Signal** : tu retapes le même prompt, ou tu colles la même procédure, pour la troisième fois.
+:::
+
+## Le problème
+
+On ne met pas la procédure de traitement d'un ticket dans la fiche de poste : elle fait trois pages et ne sert qu'une fois sur dix. Et côté code, qui n'a pas retapé le même prompt de revue trois fois dans la même semaine ?
+
+Ce sont les procédures que le collègue consulte quand il en a besoin. Pas celles qu'il connaît par cœur : celles qu'il va chercher.
+
+![](figures/procedures.png){width=35%}
+
+## Le concept
+
+### Un dossier, un fichier, un en-tête
+
+Un skill est un dossier, au nom du skill, rangé dans `.claude/skills/`, qui contient un fichier `SKILL.md` :
+
+```
+.claude/skills/reponse-ticket/
+└── SKILL.md
+```
+
+Le fichier a deux parties. En tête, entre deux lignes `---`, un nom et une description. En dessous, le corps : ce que Claude doit faire ou savoir, en français. Le dossier peut contenir d'autres fichiers, un exemple, une grille complète, un script, que le corps référence par un lien ; ils ne sont lus que si Claude suit ce lien.
+
+Où il vit : comme `CLAUDE.md`, au niveau personnel (`~/.claude/skills/`), au niveau du projet (`.claude/skills/` à la racine du dossier de travail), ou dans un plugin (module 6). Pour l'équipe support, qui travaille dans `support/`, ce sera `support/.claude/skills/`.
+
+### Deux natures, un format
+
+| Référence | Action |
+|---|---|
+| Un savoir que Claude applique pendant toute la session | Une procédure qu'on lance |
+| La grille tarifaire, le guide de style de l'API | `/reponse-ticket`, `/review` |
+| Claude le charge lui-même quand le sujet arrive | On tape `/nom`, ou Claude le déclenche s'il juge que c'est le moment |
+
+Même fichier, même format ; la différence est dans l'usage. Une ligne d'en-tête compte pour les actions à effets de bord : `disable-model-invocation: true` réserve le skill à l'invocation manuelle. Un skill qui envoie, publie ou déploie porte cette ligne : jamais de sa propre initiative.
+
+### Ce qui est lu, et quand
+
+C'est le point qui explique tout le reste du chapitre.
+
+Au démarrage d'une session, Claude ne lit que la **description** de chaque skill. Toutes les descriptions, de tous les skills, mais rien d'autre. Le corps n'est lu que si le skill est déclenché ; à ce moment-là il entre dans la conversation et y reste jusqu'à la fin.
+
+![](figures/description-etiquette.png){width=35%}
+
+Deux conséquences :
+
+1. **La description décide.** C'est la seule chose que Claude voit avant de choisir. Vague, le skill n'est jamais déclenché ; trop large, il se déclenche à tort.
+2. **Un skill inutilisé coûte une ligne.** Alors qu'un `CLAUDE.md` de six cents lignes coûte six cents lignes à chaque session. C'est pour cela qu'on sort les procédures de `CLAUDE.md`.
+
+Pour les développeurs, une précision vérifiée : la liste des descriptions a un budget, environ un pour cent de la fenêtre de contexte. Au-delà, les descriptions des skills les moins utilisés sont tronquées. `/skill-doctor` donne le coût et l'usage de chacun ; `/skills` liste ce qui est disponible et permet d'en désactiver.
+
+### Invocation
+
+`/nom`, suivi d'arguments. Dans le corps, `$ARGUMENTS` reprend ce qui a été tapé après le nom ; `$0`, `$1` désignent les arguments un par un. Les anciennes « slash commands » de `.claude/commands/` sont désormais des skills, avec le même nom : on n'en crée plus.
+
+## Exemple côté code
+
+Le skill de revue du dépôt Norrsken :
+
+{{< include _extraits/skill-review.md >}}
+
+La description dit *quand* : « relire un diff ou une PR avant de la proposer », pas « outil de revue de code ». Le corps est une checklist dont chaque point se vérifie ; c'est la règle du module 1 à l'échelle d'une procédure. Et `$ARGUMENTS` fait la différence entre `/review` seul, qui relit le diff courant, et `/review 42`, qui relit la PR 42.
+
+## Exemple côté métier
+
+Un skill de *référence*, sans procédure : les offres, les prix, les remises et les délais contractuels.
+
+{{< include _extraits/skill-tarifs.md >}}
+
+Claude le charge quand un ticket parle de prix ou de délai, et cesse d'inventer. Le « deux jours ouvrés » de la réponse configurée du module 0 vient de la ligne SLA Pro.
+
+Le skill d'action `/reponse-ticket`, tel que l'atelier le produit :
+
+{{< include _extraits/skill-reponse-ticket.md >}}
+
+La description est en trois parties, et c'est le sujet de la démo.
+
+## La démo : la description décide
+
+Le formateur construit `/reponse-ticket` devant la salle, avec une description volontairement étroite : « Rédige la réponse à un ticket support. » Puis trois demandes.
+
+**Première demande** : « Prépare la réponse au ticket T-0417. » Le skill se déclenche : classement, fiche client lue, article proposé.
+
+**Deuxième demande** : « Léa Brossard nous demande comment partager un planning avec un sous-traitant, tu lui réponds quoi ? »
+
+{{< include _extraits/ticket-T-0402.md >}}
+
+Le skill **ne se déclenche pas**. La réponse est correcte, vouvoyée, le produit bien nommé ; mais sans classement, sans article joint, hors procédure. Personne ne l'aurait remarqué. La demande ne contenait pas le mot « ticket » ; Claude a lu la description, n'a rien vu qui corresponde, et a fait sans.
+
+**Correction** : la description est réécrite en trois parties, dans cet ordre :
+
+1. ce que le skill fait, avec un verbe ;
+2. quand l'utiliser, avec les mots que les gens emploient réellement : « répondre à un client », « une réclamation », « un mail reçu au support », « même sans le mot ticket » ;
+3. ce qu'il ne fait pas, si un voisin prête à confusion : « pas pour les relances commerciales ».
+
+Nouvelle session, même demande mot pour mot : déclenché.
+
+**Troisième demande** : « Réponds à la réclamation de Brossard sur la facture. » Déclenché, classé facturation, et la question du montant est renvoyée au chargé de compte. Ce dernier point vient de `CLAUDE.md` : la fiche de poste et le skill jouent ensemble.
+
+Le TP 2 fait reproduire les six étapes sur son propre poste, avec `/review` en variante pour les tables dev.
+
+## Pièges
+
+**Le skill n'apparaît pas dans `/skills`.** Le chemin : `.claude/skills/<nom>/SKILL.md`, le fichier en majuscules, et le dossier de travail de la session doit contenir ce `.claude/`. Session ouverte avant la création du fichier : la relancer.
+
+**Il apparaît mais ne se déclenche pas.** Tester `/nom` à la main : si ça marche, c'est la description. La réécrire avec les mots de la demande qui n'a pas déclenché.
+
+**Il se déclenche trop.** Description trop large ; la resserrer, ou `disable-model-invocation: true` s'il doit rester manuel.
+
+**Skill ou CLAUDE.md ?** Ce dont il a besoin à chaque session, en quelques lignes : `CLAUDE.md`. Une procédure, une grille, un savoir occasionnel : skill. En cas de doute, skill : ça coûte une ligne tant que ce n'est pas utilisé.
+
+**Est-ce garanti ?** Non. Claude déclenche un skill s'il juge que c'est le moment. Un skill est une procédure *disponible*, pas *imposée*. Pour imposer, module 5.
+
+## À retenir
+
+- Un dossier dans `.claude/skills/`, un `SKILL.md`, une description et un corps.
+- Référence ou action ; `disable-model-invocation: true` pour les effets de bord.
+- Au démarrage, seules les descriptions sont lues ; le corps à l'usage, et il reste.
+- La description en trois parties : ce qu'il fait, quand avec les mots des gens, ce qu'il ne fait pas.
+- **Signal** : la troisième fois.

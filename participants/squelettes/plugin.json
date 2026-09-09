@@ -1,0 +1,6 @@
+{
+  "name": "<nom-du-plugin, en minuscules avec des tirets ; devient le préfixe des skills>",
+  "description": "<Une phrase : ce que le plugin apporte et à qui.>",
+  "version": "1.0.0",
+  "author": { "name": "<équipe ou personne>" }
+}

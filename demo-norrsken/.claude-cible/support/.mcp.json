@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "crm": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${NORRSKEN_CRM_DIR:-../../norrsken-crm}"]
+    }
+  }
+}

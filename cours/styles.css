@@ -1,0 +1,10 @@
+:root { --bleu: #1F3A5F; --accent: #D97A1E; --gris: #5A6270; --beige: #F1EFE9; }
+h1, h2, h3 { color: var(--bleu); }
+h2 { border-bottom: 2px solid var(--accent); padding-bottom: .2em; }
+.callout-note { border-left-color: var(--bleu); }
+.callout-tip { border-left-color: var(--accent); }
+figure img { max-width: 420px; }
+figure.pleine img { max-width: 100%; }
+table th { background: var(--bleu); color: #fff; }
+table tr:nth-child(even) td { background: var(--beige); }
+.signal { border-left: 5px solid var(--accent); background: #fff; padding: .5em 1em; font-size: 1.1em; }

@@ -1,0 +1,87 @@
+# Module 7 — Les ateliers : construire la chaîne complète
+
+Les six mécanismes présentés, chaque équipe construit en une heure un ensemble cohérent, en cinq étapes qui suivent l'ordre des chapitres. Ce chapitre décrit les deux ateliers, ce qu'on y observe et pourquoi les tickets ont été choisis ainsi. Les étapes pas à pas sont dans les TP 7a et 7b.
+
+![](figures/clavier.png){width=35%}
+
+| | Développeurs | Support et commercial |
+|---|---|---|
+| 1 | `CLAUDE.md` du dépôt | `CLAUDE.md` du dossier support |
+| 2 | Skill `/triage-bug` | Skills `produits-et-tarifs`, `/reponse-ticket` |
+| 3 | Sous-agent `verif` | Serveur MCP vers le CRM |
+| 4 | Hooks linter + migrations | Hooks audit + garde d'envoi |
+| 5 | Plugin chez le voisin | Test croisé : trois tickets |
+
+Deux règles. Le clavier est chez le métier ; le développeur référent indique, il n'écrit pas. Et une étape, une vérification, la suivante : chaque étape du TP dit ce qu'on doit voir avant de passer à la suite.
+
+## Atelier développeurs : du bug au correctif audité
+
+### Le ticket de travail
+
+T-0417, l'export PDF vide du module 0. Le dépôt `demo-norrsken/app/` est en version 4.5 ; `pnpm test` est vert. C'est le premier enseignement de l'atelier : les tests passent, et le client a raison.
+
+### Ce qui se passe à chaque étape
+
+**Étape 1, le `CLAUDE.md`.** Le piège est de recopier l'arborescence. Claude lit le code ; le fichier dit ce que le code ne dit pas : `pnpm`, les tests avant commit, les migrations interdites, le correctif minimal avant la refonte.
+
+**Étape 2, `/triage-bug`.** Le skill impose de *reproduire* avant de conclure :
+
+{{< include _extraits/skill-triage-bug.md >}}
+
+Un binôme qui s'arrête à « les tests sont verts » n'a pas de reproduction. La reproduction montre un export PDF réduit à son titre. La cause est dans `src/export/pdf.ts` :
+
+{{< include _extraits/pdf-ts.md >}}
+
+Le générateur lit `m.jours`, ancien nom du champ, alors que le modèle commun produit `m.journees` depuis la 4.5. Le cast masque l'erreur de type et le `?? []` masque l'absence à l'exécution. L'export tableur lit le bon champ, ce qui explique que le contournement du module 0 fonctionne. Le correctif minimal tient en une ligne.
+
+**Étape 3, `verif`.** Le sous-agent en lecture seule relit le correctif et doit signaler ce qu'aucun test ne couvrait : le contenu du PDF. C'est le moment de dire que le bug était là depuis la 4.5 parce que personne ne testait ce que le PDF contient. Le binôme écrit le test manquant.
+
+**Étape 4, deux hooks.** Le hook sur les migrations se teste en demandant d'ajouter une colonne : la tentative est refusée avec un message, et Claude propose autre chose. Le hook linter ne lance ESLint que sur le fichier édité.
+
+**Étape 5, le plugin.** Empaqueté selon le mémo des squelettes, installé chez le voisin en portée projet. Le voisin lance `/norrsken-dev:triage-bug T-0422` : le deuxième signalement d'export vide, chez un autre client, traité par la même chaîne.
+
+### Les deux autres bugs
+
+Le dépôt en contient trois, chacun relié à des tickets du corpus. Un binôme rapide prend le deuxième à l'étape 5.
+
+| Tickets | Symptôme | Où |
+|---|---|---|
+| T-0417, T-0422, T-0298 | Export PDF vide | `src/export/` |
+| T-0416 | Date limite de diagnostic fausse quand elle passe un week-end | `src/domain/sla.ts` |
+| T-0405 | Deux remises cumulées sur une facture | `src/domain/tarifs.ts` |
+
+## Atelier support : du ticket à la réponse conforme
+
+### Le principe
+
+Chaque étape a son ticket, et la bonne réponse dépend du mécanisme qu'on vient d'ajouter. À la fin, le dossier `.claude/` est exactement celui de la démo d'ouverture : la salle a construit ce qu'elle a vu le matin.
+
+### Ce qui se passe à chaque étape
+
+**Étape 1, le `CLAUDE.md`.** Test sur T-0396 : Luc Petitjean tutoie ; la réponse vouvoie quand même, nomme Norrsken Planning, et propose l'article sur l'impression.
+
+**Étape 2, deux skills.** La référence d'abord, recopiée de la grille officielle :
+
+{{< include _extraits/tarifs.md >}}
+
+Puis l'action `/reponse-ticket`. Test sur T-0419 : Paolo Marchetti veut passer à Pro pour six personnes. La réponse doit donner 114 € HT par mois, 102,60 € HT avec engagement annuel, et rien d'autre. Un prix sans « HT » ou une remise cumulée signale que la grille n'est pas chargée.
+
+Second test, le piège voulu, T-0405 :
+
+{{< include _extraits/ticket-T-0405.md >}}
+
+La cliente demande de *confirmer* un cumul de remises, et le logiciel l'a bien appliqué. Seule la grille dit non : la plus favorable s'applique, jamais les deux. La bonne réponse ne confirme pas et transmet au chargé de compte. C'est le même fait que le troisième bug de l'atelier développeurs, vu de l'autre côté.
+
+**Étape 3, le CRM.** Comme au module 4 : la fiche Brossard déplacée hors du dossier, la réponse incomplète, le serveur de fichiers connecté, la réponse complète. Le développeur référent tape la commande si le binôme est sur l'application de bureau.
+
+**Étape 4, deux hooks.** Les scripts sont fournis ; le binôme les copie, les rend exécutables, écrit le `settings.json`. L'audit s'allonge à chaque réponse. Le garde d'envoi se teste à la main : « sous 24 heures » donne le code 2 et le message ; « sous 2 jours ouvrés » donne 0.
+
+**Étape 5, le test croisé.** Trois tickets non traités, T-0412, T-0428, T-0416 (résiliation avec remboursement demandé, geste commercial demandé, délai contractuel réclamé), ou trois tickets réels anonymisés apportés par les participants, passés dans le workflow du voisin. Trois lignes sur la fiche : le ticket, ce qui cloche, quel mécanisme le corrigerait. C'est la matière de la restitution.
+
+## Si la salle n'a pas Claude Code
+
+Un seul atelier piloté par le formateur, trente minutes : les tables produisent sur papier (cinq lignes de `CLAUDE.md`, la description du skill, une règle de garde-fou), le formateur assemble et exécute sur les mêmes tickets, la salle juge. Le temps rendu va à la restitution.
+
+## Le livrable
+
+Par binôme : un dossier `.claude/` qui marche, et trois améliorations à faire la semaine suivante, notées sur la fiche de fin de journée.

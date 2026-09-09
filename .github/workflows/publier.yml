@@ -1,0 +1,61 @@
+name: Publier le cours et les slides
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.7.32
+
+      - name: Node et Marp
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g @marp-team/marp-cli@4
+
+      - name: Rendre le cours
+        run: quarto render cours --to html
+
+      - name: Rendre les slides
+        run: |
+          mkdir -p _site/slides
+          marp supports/slides.md --theme-set style/theme.css --html -o _site/slides/index.html
+          marp supports/slides.md --theme-set style/theme.css --allow-local-files --pdf -o _site/slides/slides.pdf
+          cp -R supports/figures _site/slides/figures
+
+      - name: Assembler le site
+        run: |
+          cp -R cours/_book/. _site/
+          touch _site/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deployer:
+    needs: construire
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    steps:
+      - id: deploiement
+        uses: actions/deploy-pages@v4

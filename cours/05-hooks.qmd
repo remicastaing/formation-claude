@@ -1,0 +1,117 @@
+# Module 5 — Hooks : ce qui doit arriver à chaque fois
+
+::: {.signal}
+**Signal** : tu veux qu'une chose se produise systématiquement, sans avoir à le demander.
+:::
+
+## Le problème
+
+La question du module 0 est restée ouverte : qu'est-ce qui empêche la mauvaise réponse d'être envoyée ? Jusqu'ici, rien. Tout ce qu'on a construit, `CLAUDE.md`, skills, MCP, sont des choses que Claude *sait* ou *peut*. Rien de ce qu'il *doit*.
+
+Ce sont les règles du bâtiment : le badge, l'alarme incendie. Elles ne dépendent de la bonne volonté de personne.
+
+![](figures/alarme.png){width=35%}
+
+## Le concept
+
+### Un événement, un script
+
+Claude Code émet des événements au fil de son travail. Un hook est un script attaché à un événement. Quand l'événement arrive, le script tourne, reçoit ce qui se passe (quel outil, quel fichier, quelle commande), et répond : laisser faire, bloquer, ou renvoyer une information à Claude.
+
+Quatre événements suffisent pour commencer :
+
+| Événement | Quand | Ce qu'on en fait |
+|---|---|---|
+| `SessionStart` | La session démarre | Charger un contexte, vérifier un prérequis |
+| `PreToolUse` | Claude *va* utiliser un outil | **Bloquer** : refuser une édition, une commande, un envoi |
+| `PostToolUse` | Claude *vient* d'utiliser un outil | Réagir : lancer le linter, renvoyer ses erreurs |
+| `Stop` | Claude a fini de répondre | Journaliser, vérifier que le travail est complet |
+
+Il en existe bien d'autres (début et fin de sous-agent, compaction du contexte, notification…). Un hook exécute le plus souvent un script sur le poste ; il peut aussi appeler une adresse web, un outil MCP, ou poser une question à un modèle.
+
+### Une consigne demande, un hook garantit
+
+| `CLAUDE.md` dit « ne jamais éditer `.env` » | Un hook `PreToolUse` refuse l'édition de `.env` |
+|---|---|
+| Claude lit, comprend, et s'y conforme la plupart du temps | Le script tourne avant chaque édition, quoi que Claude ait décidé |
+| Probabiliste | Déterministe |
+| Coûte des lignes de contexte à chaque session | Coûte zéro contexte, sauf s'il renvoie quelque chose |
+
+Deux conséquences. *Ce que vous ne voulez jamais voir partir chez un client, vous ne le confiez pas à une consigne : vous le mettez dans un hook.* Et : un hook ne remplace pas la consigne, il la double. La consigne dit à Claude ce qu'on attend, pour qu'il travaille dans le bon sens ; le hook s'assure que ça arrive.
+
+### Où ça se configure
+
+Dans le fichier de réglages du projet, `.claude/settings.json`, sous une clé `hooks`. Pour chaque événement : un *matcher* qui dit sur quels outils le hook s'applique (`Edit|Write`, `Bash`, un outil MCP par son nom `mcp__serveur__outil`, ou une expression régulière), et la commande à lancer.
+
+{{< include _extraits/settings-dev.md >}}
+
+Le script reçoit les détails de l'appel en entrée (JSON sur l'entrée standard) et répond par son code de sortie : **0**, on laisse faire ; **2**, on bloque, et le message écrit sur la sortie d'erreur est montré à Claude, qui le lit et cherche une autre voie. Le filtre `if` sur `Bash` permet de ne lancer le script que pour certaines commandes.
+
+Deux faits à connaître : les hooks de projet ne tournent qu'après avoir accepté la confiance du dossier, et `/hooks` liste ce qui est configuré et d'où ça vient.
+
+## La démo : la consigne, puis le hook
+
+Le dépôt de démo, avec un `CLAUDE.md` qui contient « Ne jamais modifier `.env` ». La demande : « Le port de dev doit passer à 4000, mets à jour la configuration. »
+
+Selon le jour, Claude s'arrête et demande, ou modifie le fichier. Les deux issues servent. S'il demande : il a lu la consigne, aujourd'hui. S'il modifie : la consigne était là, il l'a lue ce matin, et dans le feu de l'action il a jugé que c'était la bonne chose à faire.
+
+On active le hook :
+
+{{< include _extraits/hook-garde-fichiers.md >}}
+
+Nouvelle session, même demande. Claude tente l'édition ; le hook la refuse ; Claude reçoit « fichier de secrets » et propose autre chose : dire quelle ligne changer, ou modifier un fichier d'exemple. Le fichier n'a pas bougé, et il ne bougera jamais par ce chemin. `/context` avant et après sont identiques : le hook n'a rien coûté.
+
+Ce n'est pas que la consigne est inutile. C'est qu'elle ne suffit pas pour ce qui ne doit jamais arriver.
+
+## Exemple côté métier
+
+Deux hooks dans le dossier support.
+
+{{< include _extraits/settings-support.md >}}
+
+Le premier, avant tout outil d'envoi, lit le texte qui va partir et refuse dans deux cas : un montant en euros sans la mention « HT », ou un délai annoncé qui n'est pas dans la liste du contrat.
+
+{{< include _extraits/hook-garde-envoi.md >}}
+
+Le second, à la fin de chaque réponse, ajoute une ligne dans un fichier d'audit. C'est la ligne qu'on a vue au module 0 sans l'expliquer.
+
+{{< include _extraits/hook-audit.md >}}
+
+Reprenez la première réponse du module 0 : « sous 24 heures », un mois offert. Le garde d'envoi l'aurait arrêtée avant qu'elle parte. Même si `CLAUDE.md` avait été ignoré. Même si le skill ne s'était pas déclenché.
+
+Sans outil d'envoi connecté, on teste le script à la main, et c'est ce que fait l'atelier :
+
+```bash
+echo '{"tool_input":{"body":"Un correctif sera déployé sous 24 heures."}}' \
+  | .claude/hooks/garde-envoi.sh; echo "code $?"
+```
+
+## L'exercice : hook ou CLAUDE.md ?
+
+Le TP 5 demande une règle de garde-fou de son métier, en une phrase, puis trois questions qui tranchent :
+
+1. Y a-t-il un **moment observable** où elle s'applique ? Une édition, une commande, un envoi, une fin de réponse.
+2. Peut-on la **vérifier par un script** sur ce qui est en train de se passer ? Un chemin, un mot, un montant.
+3. Que se passe-t-il si elle est ignorée **une seule fois** ?
+
+Trois « oui », ou un « grave » à la troisième : hook. Sinon : `CLAUDE.md`. Le ton n'est pas un hook : il n'a pas de moment observable. « Ne jamais promettre de remboursement » en est un : un envoi, un mot, et un client avec une promesse écrite si c'est ignoré une fois.
+
+## Pièges
+
+**Le hook ne se déclenche pas.** `/hooks` pour vérifier qu'il est chargé ; la confiance du dossier ; le matcher, qui doit nommer l'outil exact ; le script exécutable.
+
+**Il bloque mais Claude réessaie.** C'est bien : Claude reçoit le message et cherche une autre voie. Si le message dit *pourquoi* et *quoi faire à la place*, il ne tourne pas en rond. Un hook muet produit des boucles.
+
+**Un hook est un script qui tourne avec vos droits.** On le relit comme un script de déploiement. C'est pour cela que les hooks de projet demandent la confiance du dossier.
+
+**Hook ou permission ?** Les règles de permission de Claude Code bloquent aussi, sans script, pour les cas simples : jamais cet outil, jamais cette commande. Le hook sert quand la règle regarde le *contenu*. Pour une équipe métier, retenir le hook : une seule chose à apprendre.
+
+**Le hook `Stop` peut empêcher Claude de s'arrêter** s'il renvoie un refus : utile pour « ne t'arrête pas tant que les tests ne passent pas », à manier avec une limite.
+
+## À retenir
+
+- Un événement, un script ; sortie 0 laisse faire, sortie 2 bloque avec un message.
+- Déterministe, zéro contexte : c'est le seul mécanisme garanti.
+- Une consigne demande, un hook garantit ; le hook double la consigne.
+- Moment observable, vérifiable par script, gravité d'un seul écart.
+- **Signal** : systématiquement, sans le demander.

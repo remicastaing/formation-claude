@@ -1,0 +1,83 @@
+# Module 0 — Cadrage : ce qu'on étend, et pourquoi
+
+## Ce n'est pas un chat
+
+La plupart des gens rencontrent Claude dans une fenêtre de discussion : on écrit, il répond. Claude Code n'est pas cela. C'est une **boucle**.
+
+![La boucle agentique](figures/boucle.svg){width=60%}
+
+On donne une demande. Le modèle la lit et choisit un outil : lire un fichier, lancer une commande, interroger un service. L'outil s'exécute et produit un résultat. Le modèle relit ce résultat et décide de la suite. Et cela recommence, autant de fois que nécessaire, jusqu'à ce que la tâche soit finie. C'est seulement à ce moment-là qu'on reçoit une réponse.
+
+Pour une équipe métier, la différence tient en une phrase : un chatbot, on lui parle ; un agent, on lui donne du travail. Un agent va chercher lui-même ce qui lui manque, et on peut décider à l'avance où il a le droit d'aller chercher.
+
+Pour un développeur : c'est un `while` avec un modèle de langage dedans et des appels d'outils. Le cours porte sur ce qu'on injecte dans le prompt, quels outils on branche, et quels callbacks on pose sur la boucle.
+
+Ces deux descriptions sont la même. Tout ce qui entre dans cette boucle se configure, et c'est le même outil pour les deux équipes.
+
+## Ce que « étendre » veut dire
+
+Trois questions, et rien d'autre :
+
+- **Qu'est-ce qu'il sait ?** Ce qu'il a sous les yeux au moment de travailler : conventions, ton, tarifs, procédures.
+- **À quoi est-il connecté ?** Les systèmes qu'il peut lire ou modifier : le dépôt, une base de données, le CRM, le Drive, l'outil de tickets.
+- **Que se passe-t-il automatiquement ?** Ce qui arrive à chaque fois, sans qu'on le demande, et sans que le modèle puisse l'oublier.
+
+Il y a six mécanismes. Chacun répond à l'une de ces questions, et les deux derniers, sous-agents et plugins, organisent et distribuent. Le cours les présente dans l'ordre où une équipe les construit.
+
+## La démo d'ouverture
+
+Le cours commence par une démonstration, et ce livre la reproduit parce qu'elle contient déjà tout. La même demande, tapée à l'identique dans deux environnements :
+
+```
+Prépare la réponse au ticket support/tickets/T-0417.md
+```
+
+Le premier environnement est un Claude Code nu : le ticket, et rien d'autre. Le second est un Claude Code configuré : le même ticket, plus la configuration que l'atelier support construira dans l'après-midi.
+
+Le ticket :
+
+{{< include _extraits/ticket-T-0417.md >}}
+
+### Ce que répond le Claude nu
+
+Une réponse polie et plausible, du type :
+
+> Bonjour Léa, nous sommes vraiment désolés pour ce désagrément… Nous avons bien identifié le bug d'export PDF dans Norrsken Planner et un correctif devrait être déployé sous 24 heures. Concernant votre demande de remboursement, nous vous proposons un mois offert…
+
+Elle serait envoyée telle quelle par quelqu'un de pressé. Regardons-la comme un responsable support :
+
+- Le produit s'appelle Norrsken Planning, pas Planner.
+- « Sous 24 heures » : personne n'a validé ce délai, et le contrat en prévoit un autre.
+- Un mois offert : une promesse commerciale écrite, inventée, sans validation.
+- Aucune trace de l'historique du client, alors qu'elle écrit « c'est la deuxième fois ».
+- Des excuses vagues, « désagrément », « gêne occasionnée ».
+- Rien n'a été classé, rien n'a été journalisé.
+
+### Ce que répond le Claude configuré
+
+Vouvoiement et nom exact du produit. Le délai vient du contrat : « conformément à votre contrat Pro, un diagnostic vous sera communiqué sous deux jours ouvrés ». Le ticket précédent, T-0298, est retrouvé et cité. Le remboursement n'est pas promis : « votre demande relative à la facturation du mois est transmise à votre chargé de compte, Thomas Renaud ». Un article de contournement est joint, l'export tableur. Et sous la réponse, une ligne est apparue dans un fichier d'audit : la date, le ticket, la session.
+
+Chaque amélioration vient d'un mécanisme précis, et c'est le plan du cours :
+
+| Dans la réponse | Vient de | Module |
+|---|---|---|
+| Vouvoiement, nom officiel, pas d'excuses vagues | CLAUDE.md du dossier support | 1 |
+| Classement, structure, article joint | Skill `/reponse-ticket` | 2 |
+| « Deux jours ouvrés », pas inventé | Skill de référence `produits-et-tarifs` | 2 |
+| Ticket précédent, contrat, chargé de compte | La fiche client, demain par le CRM | 4 |
+| Remboursement transmis, pas promis | CLAUDE.md, liste des interdits | 1 |
+| Ligne d'audit | Hook `Stop` | 5 |
+
+### La question qui reste ouverte
+
+Laquelle des deux on envoie, la réponse est évidente. La vraie question est : **qu'est-ce qui empêche la première d'être envoyée ?** Rien. Le module 5 y répond.
+
+## La règle de conduite des ateliers
+
+Les développeurs n'expliquent pas aux commerciaux : ils pairent. Le clavier est chez la personne du métier ; le développeur regarde, répond aux questions, et n'écrit que si on le lui demande. La raison : ce que le support construit aujourd'hui doit pouvoir être modifié par le support la semaine prochaine, sans développeur à côté.
+
+::: {.callout-note}
+## Question fréquente : est-ce que Claude apprend de ce qu'on lui dit ?
+
+Un peu, pour lui-même : Claude Code tient une mémoire automatique de vos corrections et préférences, sur votre poste, consultable avec `/memory`. Mais rien de ce qui compte pour une équipe ne doit reposer dessus. Ce qu'on veut qu'il retienne, on l'écrit, dans un fichier partagé. Le module 1 dit où.
+:::

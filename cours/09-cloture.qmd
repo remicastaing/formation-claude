@@ -1,0 +1,27 @@
+# Module 9 — Clôture
+
+![](figures/grille.png){width=35%}
+
+## Une page à emporter
+
+La grille en annexe relie chaque signal à son mécanisme et dit où est le fichier. On ne la lit pas : on l'a construite pendant la journée, signal après signal. On s'en sert ainsi : lundi, quand Claude agace, chercher la ligne. Le signal dit le mécanisme ; la colonne de droite dit où est le fichier.
+
+Deux précisions. La ligne « jamais » a deux mécanismes, et c'est voulu. Et la dernière ligne de la grille est l'ordre de construction pour une équipe qui part de zéro : la fiche de poste, une procédure, un accès, un garde-fou, puis le kit. C'est l'ordre des ateliers.
+
+## Le premier ajout de lundi
+
+Un seul, sur la fiche de fin de journée, avec trois critères : un mécanisme, un fichier qu'on écrira ou modifiera, un moment. Pas « je vais explorer les skills » ; « j'écris le `CLAUDE.md` du dossier devis, dix lignes, lundi avant 10 h ».
+
+Un engagement flou se ramène aux trois critères. Un engagement trop gros, « le plugin de toute l'équipe », commence par la fiche de poste ; le plugin viendra au point suivant.
+
+## Dans quinze jours
+
+Une heure, ensemble. Chacun montre ce qu'il a construit face à son engagement, sans jugement : ce qui n'a pas été fait dit où le cours n'a pas suffi. Ce qui est réutilisable entre dans le plugin d'équipe, qui passe en version 1.1 et s'installe chez tout le monde. Et on choisit le prochain ajout, collectif cette fois.
+
+La configuration complète de la journée est disponible comme point de départ : `demo-norrsken/.claude-cible/` et le catalogue `demo-norrsken/marketplace/`.
+
+## Le mot de la fin
+
+Ce matin, le collègue ne savait rien de chez vous. Ce soir, il a une fiche de poste, des procédures, un stagiaire, des accès, des règles du bâtiment, et un kit pour le suivant.
+
+Et tout cela est écrit, dans des fichiers que vous pouvez relire, corriger, et donner. Rien ne s'est configuré à votre insu ; rien ne se perdra si vous l'avez écrit.

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" width="900" height="420" font-family="Helvetica Neue, Arial, sans-serif">
+  <defs>
+    <marker id="fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f3a5f"/>
+    </marker>
+    <marker id="flo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#d97a1e"/>
+    </marker>
+  </defs>
+  <style>
+    .box{fill:#fff;stroke:#1f3a5f;stroke-width:3;rx:12}
+    .core{fill:#1f3a5f;stroke:#1f3a5f}
+    .lbl{font-size:26px;fill:#1c1c1c;text-anchor:middle;dominant-baseline:middle}
+    .lblw{font-size:28px;fill:#fff;text-anchor:middle;dominant-baseline:middle;font-weight:bold}
+    .arr{fill:none;stroke:#1f3a5f;stroke-width:3;marker-end:url(#fl)}
+    .arro{fill:none;stroke:#d97a1e;stroke-width:3;marker-end:url(#flo)}
+    .note{font-size:20px;fill:#5a6270;text-anchor:middle;font-style:italic}
+  </style>
+
+  <!-- Demande -->
+  <rect class="box" x="30" y="175" width="170" height="70"/>
+  <text class="lbl" x="115" y="210">Demande</text>
+  <path class="arr" d="M200,210 L295,210"/>
+
+  <!-- Modèle -->
+  <rect class="box core" x="300" y="160" width="190" height="100"/>
+  <text class="lblw" x="395" y="210">Modèle</text>
+
+  <!-- Outil (haut droite) -->
+  <rect class="box" x="600" y="40" width="170" height="70"/>
+  <text class="lbl" x="685" y="75">Outil</text>
+  <path class="arro" d="M490,180 C540,120 560,80 595,75"/>
+  <text class="note" x="560" y="60">choisit</text>
+
+  <!-- Résultat (bas droite) -->
+  <rect class="box" x="600" y="310" width="170" height="70"/>
+  <text class="lbl" x="685" y="345">Résultat</text>
+  <path class="arro" d="M685,110 L685,305"/>
+  <text class="note" x="740" y="212">exécute</text>
+
+  <!-- retour vers Modèle -->
+  <path class="arro" d="M600,345 C540,345 520,290 495,255"/>
+  <text class="note" x="520" y="330">relit</text>
+
+  <!-- Réponse -->
+  <rect class="box" x="30" y="40" width="170" height="70"/>
+  <text class="lbl" x="115" y="75">Réponse</text>
+  <path class="arr" d="M300,175 C260,140 230,100 205,80"/>
+  <text class="note" x="120" y="140">quand c'est fini</text>
+
+  <!-- légende -->
+  <text class="note" x="450" y="405">La boucle orange tourne autant de fois que nécessaire. Tout ce qui y entre se configure.</text>
+</svg>

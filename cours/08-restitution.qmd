@@ -1,0 +1,62 @@
+# Module 8 — Restitution croisée et arbitrages
+
+Ce chapitre ferme la boucle ouverte au module 0. Chaque équipe voit ce que l'autre a construit ; puis on s'entraîne à choisir le bon mécanisme ; puis on regarde ce que chacun coûte.
+
+![](figures/vote.png){width=35%}
+
+## La restitution
+
+Un binôme par atelier, trois minutes, puis deux de questions de l'autre équipe. La consigne : montrer une *réponse* ou un *correctif*, pas une configuration.
+
+Ce que les développeurs doivent voir chez le support : une procédure, un accès, un garde-fou ; un vrai outil, sans une ligne de code. Ce que le support doit voir chez les développeurs : le script qui a refusé une édition dans `migrations/` est le même mécanisme que leur garde d'envoi.
+
+Le pont entre les deux, si personne ne l'a fait : le ticket T-0405. Le support l'a refusé par écrit grâce à la grille ; les développeurs ont trouvé, ou peuvent trouver, le cumul de remises dans le code. Même fait, deux côtés, deux mécanismes.
+
+## Le quiz d'arbitrage
+
+Dix besoins, un vote à main levée par question, puis la réponse et une phrase. Les six premiers sont un par mécanisme ; les quatre derniers sont des pièges.
+
+| # | Le besoin | Réponse | Pourquoi |
+|---|---|---|---|
+| 1 | Claude oublie qu'on facture en HT | CLAUDE.md | Toujours vrai, une ligne, deux fois la même erreur |
+| 2 | Relire chaque devis avec ma grille | Skill | Une procédure qu'on lance, un savoir de référence à côté |
+| 3 | Aller chercher l'historique du client tout seul | MCP | Il manque l'accès |
+| 4 | Ne *jamais* envoyer un mail sans validation | Hook | « Jamais » sur un événement observable, l'envoi |
+| 5 | Tout ce qui touche à l'export PDF dans le code | Sous-agent | Beaucoup de lecture, une conclusion courte |
+| 6 | L'équipe de Lyon veut la même config | Plugin | Deuxième équipe |
+| 7 | Ne jamais promettre de remboursement par écrit | **CLAUDE.md + hook** | La consigne dit ce qu'on attend, le hook garantit |
+| 8 | À chaque rendez-vous, le même compte rendu, que je relis et corrige | Skill, pas sous-agent | On veut le résultat sous les yeux et on itère dessus |
+| 9 | Il appelle le produit Norrsken Planner | CLAUDE.md, pas skill | Une ligne, toujours vraie |
+| 10 | Le CRM est connecté, mais il répond sans regarder la fiche | Skill, pas MCP | L'accès est là ; le savoir-faire manque |
+
+La question 7 est la plus importante du quiz. Une règle avec « jamais » dedans a besoin des deux : la fiche de poste pour que Claude rédige dans le bon sens, le hook pour que rien ne parte. La question 10 est le piège du module 4 : « qu'est-ce qui manque ? il a l'accès. »
+
+## Ce que chaque mécanisme coûte
+
+Le tableau à lire devant le `/context` d'une session ouverte depuis le matin, où l'on voit les fichiers mémoire, la taille de la liste des skills et les outils des serveurs connectés.
+
+| Mécanisme | Ce qui entre dans la conversation | Quand |
+|---|---|---|
+| CLAUDE.md | Tout le fichier, et ceux des dossiers parents | À chaque session, en entier |
+| Skill | La description ; le corps seulement si déclenché, et il reste ensuite | Démarrage ; puis à l'usage |
+| Sous-agent | Le résumé qu'il rapporte, rien d'autre | À la fin de sa mission |
+| MCP | La liste des outils du serveur, et les résultats des appels | Connexion ; puis à chaque appel |
+| Hook | Rien, sauf ce qu'il renvoie explicitement | Jamais, ou au retour |
+| Plugin | La somme de ce qu'il contient | Selon chaque composant |
+
+Deux conséquences.
+
+**Trop de skills mal décrits rendent Claude moins bon.** Les descriptions se partagent un budget, environ un pour cent du contexte ; au-delà, celles des skills les moins utilisés sont tronquées, et Claude déclenche moins bien. `/skill-doctor` donne le coût et l'usage de chacun ; ce qu'on n'utilise pas, on le désactive plutôt que de le supprimer.
+
+**Ce qui entre reste.** Une recherche dans deux cents fichiers faite dans la conversation pèse sur tout ce qui suit ; la même faite par un sous-agent pèse cinq lignes. C'est la raison d'être du module 3.
+
+## Quatre erreurs classiques
+
+1. **Le `CLAUDE.md` de 600 lignes.** Il coûte à chaque session et il est moins suivi. Ce qui n'est pas toujours vrai va dans un skill ou une règle ciblée.
+2. **La description de skill vague.** « Aide pour le support » : jamais déclenché, ou tout le temps.
+3. **Le garde-fou dans un prompt.** Une consigne demande, un hook garantit. Si ça ne doit jamais partir, c'est un script.
+4. **Les serveurs MCP qui traînent.** Des outils chargés pour rien, et une porte ouverte de plus. On débranche.
+
+## Retour au tableau du matin
+
+Les plaintes notées au tour de salle reçoivent chacune leur mécanisme, en un mot de la salle. « Il utilise npm » : fiche de poste. « Il tutoie le client » : fiche de poste, et le garde d'envoi si ça part. « Quarante pages de sortie » : stagiaire. Tout ce qui a été noté le matin a maintenant un endroit où aller.

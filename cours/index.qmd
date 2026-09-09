@@ -1,0 +1,44 @@
+# Avant de commencer {.unnumbered}
+
+Ce livre est la version écrite du cours « Étendre Claude Code ». Il suit les mêmes modules que la demi-journée, dans le même ordre, avec le même cas fil rouge. Il est plus détaillé que les slides et que ce que le formateur dit : il explique ce que les slides affirment, montre en entier les fichiers que la démo ouvre à l'écran, et dit pourquoi chaque choix a été fait.
+
+## À qui il s'adresse
+
+À deux équipes en même temps : des développeurs, et une équipe commerciale et support. Chaque mécanisme est illustré deux fois, une fois côté code et une fois côté métier, parce que c'est le même outil. Les passages qui ne concernent qu'un des deux publics sont signalés.
+
+Il suppose que Claude Code est installé, en ligne de commande ou dans l'application de bureau, et qu'on a sous la main le dépôt de démo `demo-norrsken/`.
+
+## Le cas fil rouge : Norrsken
+
+Norrsken est une PME fictive qui vend un logiciel de planification d'équipes, **Norrsken Planning**, en trois offres : Essentiel, Pro et Atelier+. Les développeurs maintiennent le produit ; les commerciaux le vendent ; le support répond aux tickets. Tous les exemples du livre viennent de là : des tickets de clients fictifs, une grille tarifaire, un dépôt de code avec des bugs, et la configuration Claude Code que les deux équipes construisent pendant la journée.
+
+## L'image à garder : le nouveau collègue
+
+Claude Code est un nouveau collègue. Compétent, rapide, et qui arrive lundi matin sans rien savoir de l'entreprise. Tout le cours consiste à lui donner ce qu'on donne à un nouveau collègue.
+
+| Le collègue | Le mécanisme | Module |
+|---|---|---|
+| La fiche de poste qu'on lui donne le premier jour | CLAUDE.md | 1 |
+| Les procédures qu'il consulte quand il en a besoin | Skills | 2 |
+| Le stagiaire à qui il délègue une recherche | Sous-agents | 3 |
+| Ses accès : CRM, base de données, Slack | MCP | 4 |
+| Les règles du bâtiment : badge, alarme incendie | Hooks | 5 |
+| Le kit d'onboarding qu'on copie pour la prochaine équipe | Plugins | 6 |
+
+L'image a une limite, à connaître dès le départ : ce collègue oublie tout entre deux sessions. Ce qui n'est pas écrit dans l'un de ces six endroits n'existe pas le lendemain. C'est précisément pour cela qu'on écrit.
+
+## Les trois questions
+
+Étendre Claude Code se résume à trois questions, et chaque mécanisme répond à l'une d'elles :
+
+1. **Qu'est-ce qu'il sait ?** CLAUDE.md, skills.
+2. **À quoi est-il connecté ?** MCP.
+3. **Que se passe-t-il automatiquement ?** Hooks.
+
+Les sous-agents organisent son travail ; les plugins le distribuent.
+
+## Comment lire
+
+Chaque module a la même structure : le problème qu'on cherche à résoudre, le concept, ce qu'il faut savoir du fonctionnement réel de Claude Code (vérifié contre la documentation officielle en septembre 2026), un exemple côté code et un côté métier avec les fichiers complets, la démo ou l'exercice, les pièges, et une phrase à retenir : le *signal* qui dit « c'est ce mécanisme-là ».
+
+Une phrase revient d'un bout à l'autre : **une consigne demande, un hook garantit.** Elle est expliquée au module 5 ; tout ce qui précède la prépare.

@@ -1,0 +1,58 @@
+project:
+  type: book
+  output-dir: _book
+  pre-render: ./extraire.sh
+
+lang: fr
+
+book:
+  title: "Étendre Claude Code"
+  subtitle: "Six mécanismes, un cas fil rouge, une demi-journée"
+  author: "Rémi Castaing"
+  date: today
+  favicon: figures/favicon.png
+  cover-image: figures/logo-512.png
+  cover-image-alt: "Le stagiaire, logo du cours"
+  sidebar:
+    logo: figures/logo-512.png
+    tools:
+      - icon: easel
+        text: Support de présentation
+        href: slides/index.html
+      - icon: file-pdf
+        text: Slides en PDF
+        href: slides/slides.pdf
+      - icon: github
+        text: Sources
+        href: https://github.com/remicastaing/formation-claude
+  chapters:
+    - index.qmd
+    - 00-cadrage.qmd
+    - 01-claude-md.qmd
+    - 02-skills.qmd
+    - 03-sous-agents.qmd
+    - 04-mcp.qmd
+    - 05-hooks.qmd
+    - 06-plugins.qmd
+    - 07-ateliers.qmd
+    - 08-restitution.qmd
+    - 09-cloture.qmd
+  appendices:
+    - annexe-grille.qmd
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    toc-depth: 3
+    number-sections: false
+    code-copy: true
+    fig-align: center
+  pdf:
+    documentclass: scrreprt
+    papersize: a4
+    toc: true
+    number-sections: false
+    colorlinks: true
+    geometry: margin=2.5cm

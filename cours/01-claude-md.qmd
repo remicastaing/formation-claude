@@ -1,0 +1,116 @@
+# Module 1 — Le contexte permanent : CLAUDE.md et règles
+
+::: {.signal}
+**Signal** : Claude se trompe deux fois sur la même convention.
+:::
+
+## Le problème
+
+« Il utilise npm alors qu'on est sur pnpm. » « Il tutoie le client. » « Il appelle le produit Planner. » À la question « vous le lui avez dit combien de fois ? », la réponse est toujours « à chaque fois ». Chaque session repart de zéro, et tout ce qu'on a expliqué la veille est perdu.
+
+C'est le problème de la fiche de poste : ce qu'on donne une fois, et qu'il relit chaque matin.
+
+![](figures/fiche-de-poste.png){width=35%}
+
+## Le concept
+
+### Ce que c'est
+
+Un fichier markdown, nommé `CLAUDE.md`, écrit en langage courant : des titres, des puces, des phrases. Aucune syntaxe à apprendre. Claude le lit au début de chaque session, en entier.
+
+C'est le seul des six mécanismes qui est *toujours* actif. La conséquence est immédiate : tout ce qu'on y met coûte à chaque conversation, qu'on en ait besoin ce jour-là ou non. On y met donc ce dont Claude a besoin tout le temps, et rien d'autre.
+
+### Où il vit
+
+Trois niveaux qui s'empilent, du plus général au plus précis.
+
+| Niveau | Fichier | Qui le voit |
+|---|---|---|
+| Moi, partout | `~/.claude/CLAUDE.md` | Moi seul, sur tous mes projets |
+| Le projet | `CLAUDE.md` à la racine du dépôt ou du dossier de travail | Toute l'équipe, via le dépôt |
+| Moi, sur ce projet | `CLAUDE.local.md` à côté, non versionné | Moi seul |
+
+Ils s'additionnent : Claude lit le fichier utilisateur, puis celui du projet, puis le local. Rien n'écrase rien ; ce qui est lu en dernier est le plus proche de vous. Il existe aussi un niveau « entreprise », déployé par l'informatique sur tous les postes, qui ne peut pas être désactivé individuellement.
+
+Un détail qui compte pour l'équipe support : un `CLAUDE.md` placé dans un *sous-dossier* d'un projet plus large n'est pas chargé au lancement. Il l'est quand Claude lit un fichier de ce sous-dossier. Pour éviter la surprise, les participants métier ouvrent le dossier `support/` comme dossier de travail : leur fichier est alors à la racine, chargé dès le départ.
+
+### Combien
+
+Moins de deux cents lignes par fichier. Au-delà, deux effets : le contexte se remplit, et Claude suit moins bien. Ce qui dépasse va ailleurs :
+
+- une procédure en plusieurs étapes, un savoir qui ne sert qu'à l'occasion → un **skill** (module 2) ;
+- une règle qui ne concerne qu'une partie des fichiers → `.claude/rules/`, un fichier par sujet, avec en tête la liste des chemins concernés ; la règle n'est chargée que quand Claude touche à ces fichiers :
+
+```markdown
+---
+paths:
+  - "src/api/**/*.ts"
+---
+Toute route API valide ses entrées et renvoie le format d'erreur standard.
+```
+
+On peut aussi importer un autre fichier avec `@chemin/vers/fichier`, mais l'import est chargé au lancement comme le reste : il organise, il n'allège pas.
+
+### Ce que ce n'est pas
+
+Une consigne, pas une barrière. Claude reçoit le contenu de `CLAUDE.md` comme un message de vous : il s'y conforme, en général, mais rien ne l'y force. Ce qui doit être *garanti* va dans un hook, module 5. La moitié des erreurs classiques vient de l'oubli de cette distinction.
+
+### Deux commandes
+
+- `/init` génère un premier `CLAUDE.md` en analysant le projet : commandes de build, conventions qu'il découvre. On affine ensuite avec ce que Claude ne peut pas deviner.
+- `/context` liste ce qui est réellement chargé dans la session, dont les fichiers mémoire. C'est le premier réflexe quand « il n'applique pas ma règle ».
+
+## Exemple côté code
+
+Le `CLAUDE.md` du dépôt Norrsken, tel que l'atelier développeurs le produit :
+
+{{< include _extraits/claude-md-dev.md >}}
+
+Quatre choses à y voir.
+
+1. **Une commande, pas une intention.** « `pnpm test` avant chaque commit », pas « teste bien ».
+2. **Une convention qui diffère du défaut.** `pnpm` et non `npm` : Claude sait faire les deux, il faut lui dire laquelle. Ce qui est standard n'a pas besoin d'être écrit.
+3. **Un interdit formulé comme un interdit.** « Ne jamais modifier `app/migrations/` sans demander. » Le module 5 montrera que cette ligne ne suffit pas.
+4. **Ce qui n'y est pas.** Pas d'arborescence complète, pas de liste de dépendances : Claude le déduit du code. Le fichier dit ce que le code ne dit pas.
+
+Une trentaine de lignes.
+
+## Exemple côté métier
+
+Le `CLAUDE.md` du dossier `support/`, même structure, autre métier :
+
+{{< include _extraits/claude-md-support.md >}}
+
+Le ton, les noms officiels, les seuls délais qu'on écrit, et les interdits par écrit. Les trois premières corrections de la réponse configurée du module 0 viennent de ce fichier.
+
+## L'exercice : dix lignes
+
+Le TP 1 demande dix lignes de `CLAUDE.md` pour son propre contexte, à partir d'un squelette pré-rempli, puis de lancer une session et de vérifier qu'une ligne est appliquée. La relecture en binôme n'a qu'une question, à poser sur chaque ligne : « celle-là, tu la vérifies comment ? »
+
+![](figures/souhait-contrainte.png){.pleine}
+
+C'est la leçon de l'exercice : la différence entre un souhait et une contrainte.
+
+| Souhait | Contrainte |
+|---|---|
+| « Essaie de garder les réponses courtes » | « 150 mots maximum » |
+| « Fais attention aux migrations » | « Ne jamais modifier `migrations/` sans demander » |
+| « Sois poli avec les clients » | « Vouvoiement. Clôture : "Nous restons à votre disposition." » |
+
+Une contrainte se vérifie : on peut dire, en lisant une réponse, si elle a été respectée ou non. Un souhait, non. Claude suit les contraintes bien mieux que les souhaits, précisément parce qu'elles sont vérifiables.
+
+## Pièges
+
+**Il ne suit pas ma ligne.** Dans l'ordre : `/context` pour vérifier que le fichier est chargé ; la ligne est-elle une contrainte ou un souhait ; deux lignes se contredisent-elles, y compris entre le fichier utilisateur et celui du projet. Si la ligne est un « toujours faire X avant Y », c'est un hook.
+
+**Je mets tout dans mon fichier utilisateur.** Non : ce qui concerne le projet va dans le fichier du projet, sinon le collègue ne l'a pas. Le fichier utilisateur, ce sont vos préférences, sur tous vos projets.
+
+**Les commentaires.** Les commentaires HTML `<!-- -->` sont retirés avant lecture et ne coûtent rien. Utiles pour laisser une note aux mainteneurs du fichier.
+
+## À retenir
+
+- `CLAUDE.md` est lu en entier à chaque session : c'est la fiche de poste.
+- Trois niveaux additifs ; moins de deux cents lignes ; ce qui dépasse va dans un skill ou une règle ciblée.
+- Des contraintes vérifiables, pas des souhaits.
+- Une consigne, pas une barrière.
+- **Signal** : Claude se trompe deux fois sur la même convention. Une fois, c'est un hasard ; deux fois, c'est une ligne de CLAUDE.md à écrire.

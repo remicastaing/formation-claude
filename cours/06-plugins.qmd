@@ -1,0 +1,86 @@
+# Module 6 — Plugins et marketplaces : emballer et distribuer
+
+::: {.signal}
+**Signal** : une deuxième équipe, ou un deuxième dépôt, a besoin de la même configuration.
+:::
+
+## Le problème
+
+« L'équipe de Lyon veut la même chose. » Jusqu'ici, la seule réponse est de copier le dossier `.claude/`, d'espérer que rien ne se perde, et de recopier à chaque changement.
+
+C'est le kit d'onboarding : on ne réexplique pas tout au prochain, on lui donne le kit.
+
+![](figures/kit.png){width=35%}
+
+## Le concept
+
+### Tout dans un dossier
+
+Un plugin est un dossier. Il contient un petit fichier d'identité, `.claude-plugin/plugin.json`, et à côté, à la racine du dossier, exactement ce qu'on a construit dans les chapitres précédents, dans les mêmes formats :
+
+```
+norrsken-support/
+├── .claude-plugin/plugin.json   nom, description, version
+├── skills/                      reponse-ticket/, produits-et-tarifs/, compte-rendu-rdv/
+├── agents/                      veille-concurrent.md
+├── hooks/hooks.json             garde-envoi, audit  (+ les scripts)
+└── .mcp.json                    le CRM
+```
+
+{{< include _extraits/plugin-json.md >}}
+
+Un plugin, c'est un `.claude/` avec un nom et une version. Il ne contient pas le `CLAUDE.md` : la fiche de poste vit dans le dossier de travail, pas dans le kit.
+
+L'erreur classique, signalée par la documentation elle-même : mettre `skills/` ou `hooks/` *dans* `.claude-plugin/`. Seul `plugin.json` va là ; tout le reste est à la racine du plugin.
+
+### Le préfixe
+
+Installé, les skills du plugin s'appellent `/norrsken-support:reponse-ticket`. Toujours préfixés, pour que deux plugins puissent avoir un skill du même nom sans se gêner. Le préfixe est le nom du plugin.
+
+Ce qui change par rapport au dossier qu'on copie : on l'installe, il a une version, et quand elle change tout le monde reçoit la mise à jour.
+
+### Un catalogue, une commande
+
+Un *marketplace* est un catalogue : un fichier, `.claude-plugin/marketplace.json`, qui liste des plugins et dit où les trouver. Il peut vivre dans un dossier partagé, dans un dépôt git interne, ou en public. Anthropic en tient un officiel, enregistré d'office, avec les intégrations (GitHub, Slack, Jira…) et les plugins de code intelligence.
+
+{{< include _extraits/marketplace-json.md >}}
+
+Installer, c'est deux étapes, dans une session :
+
+```
+/plugin marketplace add /chemin/vers/demo-norrsken/marketplace
+/plugin install norrsken-support@norrsken
+```
+
+Trois portées, les mêmes qu'ailleurs : pour moi partout, pour ce projet et toute l'équipe, pour moi sur ce projet. La portée projet écrit le plugin dans les réglages du dépôt : le prochain qui clone l'a. Un dépôt peut aussi déclarer son catalogue dans `.claude/settings.json` (`extraKnownMarketplaces`) : celui qui ouvre le projet et lui fait confiance a le catalogue sans rien faire.
+
+Pour développer sans installer : `claude --plugin-dir ./mon-plugin` charge le dossier pour la session, `/reload-plugins` reprend les modifications, et `claude plugin validate ./mon-plugin` vérifie la structure.
+
+## La démo : un poste vierge
+
+Le poste d'un nouveau chargé de support, lundi matin : un dossier `support/` avec les tickets, les fiches, la base de connaissances, et rien d'autre. `/` : aucun skill Norrsken.
+
+Ajouter le catalogue, installer le plugin en portée projet, recharger. `/` : `/norrsken-support:reponse-ticket`, `/norrsken-support:compte-rendu-rdv`. `/hooks` : le garde d'envoi et l'audit. `/mcp` : le CRM. Puis `/norrsken-support:reponse-ticket T-0417` : la réponse du module 0, sur un poste qui n'avait rien deux minutes plus tôt.
+
+Un enseignement intégré à la démo : sans `CLAUDE.md` dans le dossier, le ton vient du seul skill. Si la réponse dérape, c'est que la fiche de poste manque, et qu'elle ne fait pas partie du kit.
+
+## Les plugins de code intelligence
+
+Pour les développeurs : sur le marketplace officiel, `typescript-lsp`, `pyright-lsp` et leurs équivalents branchent un serveur de langage. Claude voit les erreurs de type après chaque édition et navigue par définitions et références plutôt que par recherche de texte. Le binaire du serveur de langage doit être installé sur le poste ; le plugin ne l'installe pas.
+
+## Pièges
+
+**Les skills n'apparaissent pas après l'installation.** `/reload-plugins`, puis `/plugin`, onglet Erreurs.
+
+**Mon skill existe deux fois**, `/reponse-ticket` et `/norrsken-support:reponse-ticket`. Normal si le dossier `.claude/skills/` d'origine est encore là ; on supprime l'original une fois le plugin installé. Pour les agents c'est l'inverse : l'agent du projet masque celui du plugin tant qu'il existe.
+
+**Il faut un serveur pour héberger le marketplace ?** Non. Un dossier partagé suffit pour commencer, un dépôt git interne ensuite.
+
+**Confiance.** Un plugin exécute du code avec vos droits : hooks, serveurs MCP. On n'installe que des plugins de sources connues.
+
+## À retenir
+
+- Un dossier : `plugin.json` plus skills, agents, hooks, MCP à la racine. Pas de `CLAUDE.md`.
+- Toujours préfixé : `/plugin:skill`.
+- Marketplace = catalogue ; deux commandes ; trois portées.
+- **Signal** : une deuxième équipe.

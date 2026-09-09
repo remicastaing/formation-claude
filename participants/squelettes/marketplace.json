@@ -1,0 +1,11 @@
+{
+  "name": "<nom-du-catalogue>",
+  "owner": { "name": "<équipe>" },
+  "plugins": [
+    {
+      "name": "<nom-du-plugin>",
+      "source": "./plugins/<nom-du-plugin>",
+      "description": "<Une phrase.>"
+    }
+  ]
+}

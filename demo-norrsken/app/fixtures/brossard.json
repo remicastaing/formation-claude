@@ -1,0 +1,13 @@
+{
+  "client": "Atelier Brossard",
+  "creneaux": [
+    { "id": "c1", "employe": "Nadia", "date": "2026-09-14", "debut": "08:00", "fin": "12:00", "poste": "Débit" },
+    { "id": "c2", "employe": "Nadia", "date": "2026-09-14", "debut": "13:00", "fin": "17:00", "poste": "Débit" },
+    { "id": "c3", "employe": "Karim", "date": "2026-09-14", "debut": "08:00", "fin": "16:00", "poste": "Montage" },
+    { "id": "c4", "employe": "Karim", "date": "2026-09-15", "debut": "08:00", "fin": "16:00", "poste": "Montage" },
+    { "id": "c5", "employe": "Sofia", "date": "2026-09-16", "debut": "09:00", "fin": "18:00", "poste": "Pose" },
+    { "id": "c6", "employe": "Sofia", "date": "2026-09-17", "debut": "09:00", "fin": "18:00", "poste": "Pose" },
+    { "id": "c7", "employe": "Nadia", "date": "2026-09-18", "debut": "08:00", "fin": "12:00", "poste": "Finition" },
+    { "id": "c8", "employe": "Karim", "date": "2026-09-19", "debut": "08:00", "fin": "12:00", "poste": "Inventaire" }
+  ]
+}
