@@ -53,6 +53,41 @@ jobs:
         with:
           path: _site
 
+  kit-participants:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assembler le kit
+        run: |
+          K=$(mktemp -d)
+          mkdir -p "$K/demo-norrsken" "$K/participants"
+          cp -R demo-norrsken/app demo-norrsken/support demo-norrsken/README.md "$K/demo-norrsken/"
+          cp -R participants/squelettes participants/grille-declencheur-mecanisme.md participants/quiz-arbitrage.md participants/fiche-engagement.md "$K/participants/"
+          cp -R tp "$K/tp"
+          cp participants/README-kit.md "$K/README.md"
+          printf 'node_modules/\n.env\nsupport/audit.log\n.claude/\n.mcp.json\nCLAUDE.md\n' > "$K/demo-norrsken/.gitignore"
+          echo "KIT=$K" >> "$GITHUB_ENV"
+
+      - name: Publier dans norrsken-demo
+        env:
+          DEPLOY_KEY: ${{ secrets.NORRSKEN_DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh && printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/norrsken && chmod 600 ~/.ssh/norrsken
+          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/norrsken -o IdentitiesOnly=yes"
+          W=$(mktemp -d)
+          git clone -q git@github.com:remicastaing/norrsken-demo.git "$W" || (cd "$W" && git init -q -b main && git remote add origin git@github.com:remicastaing/norrsken-demo.git)
+          find "$W" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -R "$KIT"/. "$W"/
+          cd "$W"
+          git config user.name "formation-claude (Actions)"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "Kit inchangé."; exit 0; fi
+          git commit -q -m "Mettre à jour le kit depuis formation-claude@${GITHUB_SHA::7}"
+          git push -q origin HEAD:main
+
   deployer:
     needs: construire
     runs-on: ubuntu-latest

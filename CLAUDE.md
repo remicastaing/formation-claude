@@ -31,7 +31,8 @@ supports/README.md                     commandes de rendu Marp
 cours/NN-slug.qmd                      le cours écrit, livre Quarto, un chapitre par module (07 regroupe les ateliers)
 cours/_extraits/                       GÉNÉRÉ par cours/extraire.sh depuis demo-norrsken/ ; inclus par les chapitres, ne pas éditer
 cours/README.md                        commandes de rendu Quarto et de publication
-.github/workflows/publier.yml         GitHub Actions : rend cours + slides et publie sur https://remicastaing.github.io/formation-claude/ à chaque push sur main
+.github/workflows/publier.yml         GitHub Actions : rend cours + slides sur https://remicastaing.github.io/formation-claude/ et pousse le kit des participants dans le dépôt public remicastaing/norrsken-demo, à chaque push sur main
+participants/README-kit.md             devient le README du dépôt norrsken-demo
 style/redaction.md                     ton, structure des notes, des scripts, des slides, cas fictif
 style/charte-graphique.md              couleurs, typographie, mise en page des images
 style/illustrations.md                 gabarit du prompt d'illustration
@@ -55,7 +56,7 @@ logistique/bugs-plantes.md             cause, correctif et tests des trois bugs 
 - **Minutage, ce que fait le formateur, messages clés, pièges, questions fréquentes** → `modules/`.
 - **Ce que le formateur dit, mot pour mot** → `scripts/`. Format dans `style/redaction.md`.
 - **Tout texte projeté** → `supports/slides.md`. Ne pas dupliquer une slide dans un module.
-- **Tout ce qu'un participant reçoit ou clone** → `participants/` ou `demo-norrsken/`. Jamais de réponse attendue ni de piège à ne pas révéler dans ces dossiers.
+- **Tout ce qu'un participant reçoit ou clone** → `participants/`, `tp/` ou `demo-norrsken/`. Jamais de réponse attendue ni de piège à ne pas révéler dans ces dossiers. Le workflow en fait le kit `norrsken-demo` en excluant `demo-norrsken/.claude-cible/` et `demo-norrsken/marketplace/`, qui restent au formateur ; tout nouveau fichier participant doit être dans un de ces trois dossiers pour arriver dans le kit.
 - **Contenu fictif Norrsken (tickets, fiches, articles KB, tarifs)** → `demo-norrsken/support/`, même s'il n'est cité que dans un module.
 - **Configuration finale que les ateliers construisent** (CLAUDE.md, skills, agents, hooks, plugin) → `demo-norrsken/.claude-cible/dev/` ou `support/`.
 - **Étapes d'un exercice que les participants suivent eux-mêmes** → `tp/`. Objectif, durée, prérequis, étapes numérotées avec vérification à chaque étape, section « si ça ne marche pas ». Le module renvoie au TP et ne répète pas les étapes.

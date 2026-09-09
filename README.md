@@ -4,6 +4,7 @@ Préparation complète d'un cours de 3 h 30 sur les six mécanismes d'extension 
 
 - **Le cours écrit** : https://remicastaing.github.io/formation-claude/
 - **Le support de présentation** : https://remicastaing.github.io/formation-claude/slides/ ([PDF](https://remicastaing.github.io/formation-claude/slides/slides.pdf))
+- **Le kit des participants** : https://github.com/remicastaing/norrsken-demo (dépôt de démo, squelettes, TP ; généré automatiquement, sans les notes du formateur)
 
 | Dossier | Contenu |
 |---|---|

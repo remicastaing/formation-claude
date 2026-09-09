@@ -22,6 +22,9 @@ book:
       - icon: file-pdf
         text: Slides en PDF
         href: slides/slides.pdf
+      - icon: box-seam
+        text: Kit des participants
+        href: https://github.com/remicastaing/norrsken-demo
       - icon: github
         text: Sources
         href: https://github.com/remicastaing/formation-claude

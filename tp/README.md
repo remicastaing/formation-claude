@@ -1,5 +1,7 @@
 # Travaux pratiques
 
+**Avant tout** : récupérez le kit des participants, `git clone https://github.com/remicastaing/norrsken-demo.git` ou le ZIP depuis cette page, et lisez son `README.md`. Il contient le dépôt de démo, les squelettes et ces TP.
+
 Un fichier par TP, distribué tel quel aux participants. Chaque fichier donne l'objectif, le temps, les prérequis, les étapes numérotées avec ce qu'on doit voir à chaque étape, et une section « si ça ne marche pas ». Aucune réponse attendue ni piège à ne pas révéler : ils sont dans `logistique/`.
 
 | TP | Module | Durée | Fichier |

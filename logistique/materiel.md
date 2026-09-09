@@ -23,7 +23,7 @@ Chaque module garde sa liste courte ; ce fichier est la vue d'ensemble, à coche
 - [ ] `.claude-cible/dev/CLAUDE.md` et `.claude-cible/support/CLAUDE.md` testés sur une session réelle.
 - [ ] `participants/squelettes/CLAUDE.md` pré-rempli.
 - [ ] Ticket T-0402 disponible pour le test métier.
-- [ ] Dépôt de démo distribué **sans** `CLAUDE.md` à la racine.
+- [ ] Les participants ont cloné `norrsken-demo` (kit sans `CLAUDE.md`, `.claude/` ni `.mcp.json`).
 
 ## Module 2
 
@@ -71,7 +71,7 @@ Chaque module garde sa liste courte ; ce fichier est la vue d'ensemble, à coche
 ## Module 7 — ateliers
 
 - [ ] `demo-norrsken/app/` : `pnpm test` vert sur la machine de projection ; `pnpm install` fait pour ESLint ; Node 22.6 ou plus sur les postes dev.
-- [ ] Dépôt distribué sans `.claude/`, `CLAUDE.md`, `.mcp.json` (ni à la racine, ni dans `support/`).
+- [ ] Kit `norrsken-demo` à jour (dernier push de `formation-claude` réussi) ; il ne contient ni `.claude-cible/` ni `marketplace/`.
 - [ ] Squelettes complets, dont `participants/squelettes/support/` (deux scripts et `hooks.json`).
 - [ ] `norrsken-crm/` vide à côté de chaque clone.
 - [ ] [[bugs-plantes]] imprimé pour le formateur seulement.
