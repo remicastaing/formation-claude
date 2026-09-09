@@ -32,7 +32,9 @@ jobs:
       - run: npm install -g @marp-team/marp-cli@4
 
       - name: Rendre le cours
-        run: quarto render cours --to html
+        run: |
+          ./cours/extraire.sh
+          quarto render cours --to html
 
       - name: Rendre les slides
         run: |
